@@ -111,6 +111,10 @@ def BlobTrigger(myblob: func.InputStream):
             
                 document_client = DocumentAnalysisClient(FORM_RECOGNIZER_ENDPOINT, AzureKeyCredential(FORM_RECOGNIZER_KEY))
                 blob_data = blob_client_n.download_blob().readall()
+                
+                logging.debug(f'Blobdata: {blob_data}')
+
+                
 
                 if(content_type == "application/pdf"):
                     try:
@@ -120,6 +124,7 @@ def BlobTrigger(myblob: func.InputStream):
                         for page in result.pages:
                             for line in page.lines:            
                                 content += line.content +  " "
+                        logging.info("Content pdf",content)
                     except Exception as ex:
                         print("Exception occured for pdf ",ex)
                 
@@ -133,6 +138,7 @@ def BlobTrigger(myblob: func.InputStream):
                         for page in result.pages:
                             for line in page.lines:            
                                 content += line.content +  " "
+                        logging.info("Content image ",content)
                     except Exception as ex:
                         print("Exception occured for images ",ex)
                     
@@ -148,6 +154,7 @@ def BlobTrigger(myblob: func.InputStream):
                             content_stream = io.BytesIO(blob_data)
                             elements = partition_docx(file=content_stream)
                             content =  "\n".join([str(el) for el in elements])
+                        logging.info("Content text or docx ",content)
                     except Exception as ex:
                         print("Exception occured for text or plain ",ex)
                 
