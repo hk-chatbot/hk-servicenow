@@ -1,7 +1,7 @@
 name: Function App service_now main
  
 on:
-  [push]
+  workflow_dispatch:
  
 env:
   AZURE_FUNCTIONAPP_NAME: 'servicenow-funcapp'   # set this to your function app name on Azure
