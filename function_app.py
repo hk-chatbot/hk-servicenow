@@ -1,4 +1,5 @@
 import io
+import json
 import logging
 import uuid
 import azure.functions as func
@@ -92,15 +93,17 @@ def BlobTrigger(myblob: func.InputStream):
         blob_client = None
         blob_client_n = None
         blob_service_client = None
+        blob_client_metadata = None
         search_client = None
         blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
         blob_client = blob_service_client.get_blob_client(container=CONTAINERNAME, blob=myblob.name)  
     
         container_client = blob_service_client.get_container_client(CONTAINERNAME)
         substring = "_at"
+        substringmetadata = "metadata"
         matching_blobs = []
         urlArr = urllib.parse.unquote(blob_client.url).split('/')
-        if not substring in urlArr[5]:
+        if not substring in urlArr[5] and substringmetadata not in urlArr[5]:
             bfileName,ext = os.path.splitext(myblob.name)
             bfileNameArr = bfileName.split('/')
             
@@ -120,7 +123,11 @@ def BlobTrigger(myblob: func.InputStream):
                 
                 logging.debug(f'Blobdata: {blob_data}')
 
-                
+                if substringmetadata in matching_blobs[i]:
+                    blob_client_metadata = blob_service_client.get_blob_client(container=CONTAINERNAME, blob=matching_blobs[i])
+                    metaData = blob_client_metadata.download_blob().readall()
+                    json_meta_data = json.loads(metaData)
+
 
                 if(content_type == "application/pdf"):
                     try:
@@ -154,6 +161,7 @@ def BlobTrigger(myblob: func.InputStream):
                         content = ""
                       
                         if blob_name.endswith(".txt"):
+                            logging.info("Inside text reading block")
 
                             if not substring in matching_blobs[i]:                    
                                 elements = partition_text(file=blob_data)
@@ -174,6 +182,7 @@ def BlobTrigger(myblob: func.InputStream):
                                 content_stream = io.BytesIO(blob_data)
                                 elements = partition_docx(file=content_stream)
                                 content =  "\n".join([str(el) for el in elements])
+                        logging.info("Content")
                         logging.info("Content text or docx: %s", content)
                     except Exception as ex:
                         print("Exception occured for text or plain ",ex)
@@ -217,30 +226,32 @@ def BlobTrigger(myblob: func.InputStream):
                     except Exception as ex:
                         print("Exception occured for xml ",ex)
 
-                response = chunk_text(text = content)
-                embedd_response = None
-                search_client = SearchClient(endpoint=SEARCHAPIENDPOINT,index_name=INDEX_NAME,credential = AzureKeyCredential(SEARCHAPIKEY))
-                logging.info("Search client created")
-                if response:
-                    try:
-                        logging.info("Chunk Response created")
-                        for chunk in response:  
-                            embedding = get_embedding_with_retry(client, chunk, EMBEDDING_MODEL)
-                        if embedding is None:
-                            raise Exception("Fallback client embedding failed.")
-                    except Exception as ex:
-                        logging.info("Other region client created for embedding.")
-                            
-                blob_file_name,extname = os.path.splitext(matching_blobs[i])
-                document = {
-            
-                "chunk_id": blob_file_name,
-                "content": content,
-                "vector": [] if embedd_response is None else embedd_response,
-            
-            }
-        
-                update_or_insert_document(client=search_client,doc_id=blob_file_name ,doc_body=[document])
+                if substringmetadata not in matching_blobs[i]:
+                    response = chunk_text(text = content)
+                    embedd_response = None
+                    search_client = SearchClient(endpoint=SEARCHAPIENDPOINT,index_name=INDEX_NAME,credential = AzureKeyCredential(SEARCHAPIKEY))
+                    logging.info("Search client created")
+                    logging.info("content %s",content)
+                    if response:
+                        try:
+                            logging.info("Chunk Response created")
+                            for chunk in response:  
+                                embedding = get_embedding_with_retry(client, chunk, EMBEDDING_MODEL)
+                            if embedding is None:
+                                raise Exception("Fallback client embedding failed.")
+                        except Exception as ex:
+                            logging.info("Other region client created for embedding.")
+                                
+                    blob_file_name,extname = os.path.splitext(matching_blobs[i])
+                    document = {
+                
+                    "chunk_id": blob_file_name,
+                    "content": content,
+                    "vector": [] if embedd_response is None else embedd_response                
+                
+                    }
+                    
+                    update_or_insert_document(client=search_client,doc_id=blob_file_name ,doc_body=[document])
                     
     except Exception as ex:
         print("Exception occoured ", ex)
@@ -256,4 +267,6 @@ def BlobTrigger(myblob: func.InputStream):
             search_client.close()
         if document_client is not None:
             document_client.close()
+        if blob_client_metadata is not None:
+            blob_client_metadata.close()
 
