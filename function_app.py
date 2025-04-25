@@ -37,10 +37,10 @@ SEARCHAPIENDPOINT = os.getenv("SEARCHAPIENDPOINT")
 SEARCHAPIKEY = os.getenv("SEARCHAPIKEY")
 INDEX_NAME = os.getenv("INDEX_NAME")
 
-client = OpenAI(api_key=os.getenv("openai_api_key"))
+#client = OpenAI(api_key=os.getenv("openai_api_key"))
 client = AzureOpenAI(
   api_key = AZURE_OPENAI_API_KEY,  
-  api_version = "2024-02-01",
+  api_version = "2023-05-15",
   azure_endpoint =AZURE_OPENAI_ENDPOINT 
 )
 
