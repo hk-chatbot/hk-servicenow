@@ -37,10 +37,10 @@ SEARCHAPIENDPOINT = os.getenv("SEARCHAPIENDPOINT")
 SEARCHAPIKEY = os.getenv("SEARCHAPIKEY")
 INDEX_NAME = os.getenv("INDEX_NAME")
 
-#client = OpenAI(api_key=os.getenv("openai_api_key"))
+
 client = AzureOpenAI(
   api_key = AZURE_OPENAI_API_KEY,  
-  api_version = "2023-05-15",
+  api_version = "2024-02-01",
   azure_endpoint =AZURE_OPENAI_ENDPOINT 
 )
 
@@ -198,7 +198,9 @@ def BlobTrigger(myblob: func.InputStream):
                                 elements = partition_docx(file=content_stream)
                                 content =  "\n".join([str(el) for el in elements])
                       
-                        #logging.info("Content text or docx: %s", content)
+                        logging.info("Before content is logged")
+                        logging.info("Content text or docx: %s", content)
+                        logging.info("After content is logged")
                     except Exception as ex:
                         print("Exception occured for text or plain ",ex)
                 
@@ -246,7 +248,9 @@ def BlobTrigger(myblob: func.InputStream):
                     embedd_response = None
                     search_client = SearchClient(endpoint=SEARCHAPIENDPOINT,index_name=INDEX_NAME,credential = AzureKeyCredential(SEARCHAPIKEY))
                     logging.info("Search client created")
-                    logging.info("content %s",content)
+                    logging.info("Before content is logged")
+                    logging.info("Content text or docx: %s", content)
+                    logging.info("After content is logged")
                     if response:
                         try:
                             logging.info("Chunk Response created")
@@ -258,6 +262,9 @@ def BlobTrigger(myblob: func.InputStream):
                             logging.info("Other region client created for embedding.")
                                 
                     blob_file_name,extname = os.path.splitext(matching_blobs[i])
+                    logging.info("Before content is logged")
+                    logging.info("Content text or docx: %s", content)
+                    logging.info("After content is logged")
                     document = {
                 
                     "chunk_id": blob_file_name,
