@@ -164,9 +164,13 @@ def BlobTrigger(myblob: func.InputStream):
                             logging.info("Inside text reading block")
                             content = ""
                             if not substring in matching_blobs[i]:                    
+                                # elements = partition_text(file=blob_data)
+                                # htmlcontent = [BeautifulSoup(el.text, 'html.parser') for el in elements]
+                                # content = "\n".join(soup.get_text(separator="\n") for soup in htmlcontent)
                                 elements = partition_text(file=blob_data)
-                                htmlcontent = [BeautifulSoup(el.text, 'html.parser') for el in elements]
-                                content = "\n".join(soup.get_text(separator="\n") for soup in htmlcontent)
+                                content = "\n".join(str(el) for el in elements)
+
+
                                 # soup = [BeautifulSoup(el.text, 'html.parser') for el in elements]
                                 # output = []    
                                 # # Walk through all elements, preserving links
