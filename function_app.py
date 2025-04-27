@@ -168,10 +168,14 @@ def BlobTrigger(myblob: func.InputStream):
                                 # elements = partition_text(file=blob_data)
                                 # htmlcontent = [BeautifulSoup(el.text, 'html.parser') for el in elements]
                                 # content = "\n".join(soup.get_text(separator="\n") for soup in htmlcontent)
-                                elements = partition_text(file=blob_data)
-                                logging.info("Number of elements from partition_text: %d", len(elements))
-                                content = "\n".join(str(el) for el in elements)
-                                logging.info("Final content after partition: %s", content[:500])
+                                try:
+                                    elements = partition_text(file=blob_data)
+                                    logging.info("Number of elements from partition_text: %d", len(elements))
+                                    content = "\n".join(str(el) for el in elements)
+                                    logging.info("Final content after partition: %s", content[:500])
+                                except ex as Exception:
+                                    logging.critical(ex)
+
 
 
                                 # soup = [BeautifulSoup(el.text, 'html.parser') for el in elements]
