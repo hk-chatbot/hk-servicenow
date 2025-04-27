@@ -1,7 +1,7 @@
 import io
 import json
 import logging
-import uuid
+
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 import os
@@ -21,7 +21,6 @@ from createembedding import get_embedding_with_retry
 from openai import OpenAI,AzureOpenAI
 from insert_update_delete import update_or_insert_document
 from azure.search.documents import SearchClient
-
 import urllib
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
@@ -163,12 +162,15 @@ def BlobTrigger(myblob: func.InputStream):
                         if blob_name.endswith(".txt"):
                             logging.info("Inside text reading block")
                             content = ""
-                            if not substring in matching_blobs[i]:                    
+                            if not substring in matching_blobs[i]:    
+                                logging.info("Inside if block")                
                                 # elements = partition_text(file=blob_data)
                                 # htmlcontent = [BeautifulSoup(el.text, 'html.parser') for el in elements]
                                 # content = "\n".join(soup.get_text(separator="\n") for soup in htmlcontent)
                                 elements = partition_text(file=blob_data)
+                                logging.info("Number of elements from partition_text: %d", len(elements))
                                 content = "\n".join(str(el) for el in elements)
+                                logging.info("Final content after partition: %s", content[:500])
 
 
                                 # soup = [BeautifulSoup(el.text, 'html.parser') for el in elements]
