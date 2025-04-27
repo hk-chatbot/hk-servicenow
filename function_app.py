@@ -159,7 +159,7 @@ def BlobTrigger(myblob: func.InputStream):
                 if(content_type == "text/plain" or content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
                     try:
                        
-                        content = "hina"
+                        content = ""
                         if blob_name.endswith(".txt"):
                             logging.info("Inside text reading block")
                             #content = ""
