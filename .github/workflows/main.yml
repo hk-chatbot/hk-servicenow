@@ -1,4 +1,4 @@
-name: Function App service_now main
+name: Function App service-now-func-app main
  
 on:
   workflow_dispatch:
