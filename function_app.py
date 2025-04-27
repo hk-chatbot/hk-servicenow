@@ -6,6 +6,7 @@ import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 import os
 from azure.ai.formrecognizer import DocumentAnalysisClient
+import nltk
 from bs4 import BeautifulSoup
 from unstructured.partition.text import partition_text
 from unstructured.partition.ppt import partition_ppt
@@ -24,6 +25,8 @@ from azure.search.documents import SearchClient
 import urllib
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+# Download NLTK punkt data for sentence tokenization
+nltk.download('punkt')
 
 CONTAINERNAME = os.getenv("CONTAINERNAME")
 AZURE_STORAGE_CONNECTION_STRING=os.getenv("AzureWebJobsStorage")
@@ -162,20 +165,20 @@ def BlobTrigger(myblob: func.InputStream):
                         content = ""
                         if blob_name.endswith(".txt"):
                             logging.info("Inside text reading block")
+                            clean_content = clean_html_text(blob_data)
+                            file_like_object = io.StringIO(clean_content)
                             #content = ""
                             if not substring in matching_blobs[i]:    
                                 logging.info("Inside if block")                
-                                # elements = partition_text(file=blob_data)
-                                # htmlcontent = [BeautifulSoup(el.text, 'html.parser') for el in elements]
-                                # content = "\n".join(soup.get_text(separator="\n") for soup in htmlcontent)
+                               
                                 try:
-                                    elements = partition_text(file=blob_data)
+                                    elements = partition_text(file=file_like_object)
                                     logging.info("Number of elements from partition_text: %d", len(elements))
                                     content = "\n".join(str(el) for el in elements)
                                     logging.info("Final content after partition: %s", content[:500])
                                 except Exception as ex:
                                     logging.exception("Unhandled exception in BlobTrigger: %s", str(ex))
-                                    lines = blob_data.decode("utf-8", errors="ignore").splitlines()
+                                    lines = clean_content.splitlines()
                                     content = "\n".join(line.strip() for line in lines if line.strip())
                                     logging.info("Before content is logged")
                                     logging.info("Content text or docx: %s", content)
@@ -316,3 +319,8 @@ def BlobTrigger(myblob: func.InputStream):
         if blob_client_metadata is not None:
             blob_client_metadata.close()
 
+
+def clean_html_text(blob_data):
+    # Clean HTML content using BeautifulSoup
+    soup = BeautifulSoup(blob_data, 'html.parser')
+    return soup.get_text(separator="\n", strip=True)
