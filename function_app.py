@@ -173,8 +173,8 @@ def BlobTrigger(myblob: func.InputStream):
                                     logging.info("Number of elements from partition_text: %d", len(elements))
                                     content = "\n".join(str(el) for el in elements)
                                     logging.info("Final content after partition: %s", content[:500])
-                                except ex as Exception:
-                                    logging.critical(ex)
+                                except Exception as ex:
+                                    logging.exception("Unhandled exception in BlobTrigger: %s", str(ex))
 
 
 
