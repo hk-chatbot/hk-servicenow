@@ -214,6 +214,11 @@ def BlobTrigger(myblob: func.InputStream):
                         logging.info("After content is logged")
                     except Exception as ex:
                         print("Exception occured for text or plain ",ex)
+                        lines = blob_data.decode("utf-8", errors="ignore").splitlines()
+                        content = "\n".join(line.strip() for line in lines if line.strip())
+                        logging.info("Before content is logged")
+                        logging.info("Content text or docx: %s", content)
+                        logging.info("After content is logged")
                 
             
                 if(content_type == "application/vnd.ms-powerpoint" or content_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
