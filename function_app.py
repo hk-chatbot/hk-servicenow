@@ -145,7 +145,7 @@ def BlobTrigger(myblob: func.InputStream):
 
                 if(content_type == "image/jpeg" or content_type == "image/png" or content_type == "image/gif"):
                     try:
-                        content = "hina"
+                        content = ""
                         poller = document_client.begin_analyze_document("prebuilt-layout", blob_data)
                         result = poller.result()
                         for page in result.pages:
@@ -159,10 +159,10 @@ def BlobTrigger(myblob: func.InputStream):
                 if(content_type == "text/plain" or content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"):
                     try:
                        
-                      
+                        content = "hina"
                         if blob_name.endswith(".txt"):
                             logging.info("Inside text reading block")
-                            content = ""
+                            #content = ""
                             if not substring in matching_blobs[i]:    
                                 logging.info("Inside if block")                
                                 # elements = partition_text(file=blob_data)
@@ -194,7 +194,7 @@ def BlobTrigger(myblob: func.InputStream):
                                 content = "\n".join(str(el) for el in elements)
                             
                         if  blob_name.lower().endswith(".docx"):
-                            content = ""
+                            #content = ""
                             if not substring in matching_blobs[i]:             
                                 content_stream = io.BytesIO(blob_data)
                                 elements = partition_docx(file=content_stream)
