@@ -80,7 +80,7 @@ def insert_blob_trigger(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Error: {str(e)}", status_code=500)
 
 
-@app.blob_trigger(arg_name="myblob", path="servicenow-container/{name}",
+@app.blob_trigger(arg_name="myblob", path="handk-container/{name}",
                                connection="AzureWebJobsStorage") 
 def BlobTrigger(myblob: func.InputStream):
     logging.info(f"Python blob trigger function processed blob"
