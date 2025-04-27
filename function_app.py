@@ -119,8 +119,9 @@ def BlobTrigger(myblob: func.InputStream):
             
                 document_client = DocumentAnalysisClient(FORM_RECOGNIZER_ENDPOINT, AzureKeyCredential(FORM_RECOGNIZER_KEY))
                 blob_data = blob_client_n.download_blob().readall()
+                logging.info("Blob data (first 500 chars): %s", blob_data[:500])
                 
-                logging.debug(f'Blobdata: {blob_data}')
+                
 
                 if substringmetadata in matching_blobs[i]:
                     blob_client_metadata = blob_service_client.get_blob_client(container=CONTAINERNAME, blob=matching_blobs[i])
@@ -144,7 +145,7 @@ def BlobTrigger(myblob: func.InputStream):
 
                 if(content_type == "image/jpeg" or content_type == "image/png" or content_type == "image/gif"):
                     try:
-                        content = ""
+                        content = "hina"
                         poller = document_client.begin_analyze_document("prebuilt-layout", blob_data)
                         result = poller.result()
                         for page in result.pages:
