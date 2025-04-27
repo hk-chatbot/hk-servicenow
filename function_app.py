@@ -175,6 +175,11 @@ def BlobTrigger(myblob: func.InputStream):
                                     logging.info("Final content after partition: %s", content[:500])
                                 except Exception as ex:
                                     logging.exception("Unhandled exception in BlobTrigger: %s", str(ex))
+                                    lines = blob_data.decode("utf-8", errors="ignore").splitlines()
+                                    content = "\n".join(line.strip() for line in lines if line.strip())
+                                    logging.info("Before content is logged")
+                                    logging.info("Content text or docx: %s", content)
+                                    logging.info("After content is logged")
 
 
 
@@ -193,9 +198,16 @@ def BlobTrigger(myblob: func.InputStream):
                                 # print(final_text)
 
 
-                            else:#for the attachments   
-                                elements = partition_text(file=blob_data)
-                                content = "\n".join(str(el) for el in elements)
+                            else:#for the attachments  
+                                try: 
+                                    elements = partition_text(file=blob_data)
+                                    content = "\n".join(str(el) for el in elements)
+                                except Exception as ex:
+                                    lines = blob_data.decode("utf-8", errors="ignore").splitlines()
+                                    content = "\n".join(line.strip() for line in lines if line.strip())
+                                    logging.info("Before content is logged")
+                                    logging.info("Content text or docx: %s", content)
+                                    logging.info("After content is logged")
                             
                         if  blob_name.lower().endswith(".docx"):
                             #content = ""
@@ -214,11 +226,7 @@ def BlobTrigger(myblob: func.InputStream):
                         logging.info("After content is logged")
                     except Exception as ex:
                         print("Exception occured for text or plain ",ex)
-                        lines = blob_data.decode("utf-8", errors="ignore").splitlines()
-                        content = "\n".join(line.strip() for line in lines if line.strip())
-                        logging.info("Before content is logged")
-                        logging.info("Content text or docx: %s", content)
-                        logging.info("After content is logged")
+                        
                 
             
                 if(content_type == "application/vnd.ms-powerpoint" or content_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation"):
