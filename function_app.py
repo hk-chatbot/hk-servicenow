@@ -125,7 +125,7 @@ def BlobTrigger(myblob: func.InputStream):
                 blob_data = blob_client_n.download_blob().readall()
                 logging.info("Blob data (first 500 chars): %s", blob_data[:500])
                 if len(matching_blobs) > 1:
-                    blob_client_metadata = blob_service_client.get_blob_client(container=CONTAINERNAME, blob=matching_blobs[1])
+                    blob_client_metadata = blob_service_client.get_blob_client(container=CONTAINERNAME, blob=matching_blobs[0])
                     metaData = blob_client_metadata.download_blob().readall()
                     json_meta_data = json.loads(metaData)
                     meta_data_kb = json_meta_data
